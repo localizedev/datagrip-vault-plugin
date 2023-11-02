@@ -18,6 +18,7 @@ import org.jetbrains.annotations.NotNull;
 import static com.premiumminds.datagrip.vault.VaultDatabaseAuthProvider.PROP_ADDRESS;
 import static com.premiumminds.datagrip.vault.VaultDatabaseAuthProvider.PROP_SECRET;
 import static com.premiumminds.datagrip.vault.VaultDatabaseAuthProvider.PROP_TOKEN_FILE;
+import static com.premiumminds.datagrip.vault.VaultDatabaseAuthProvider.PROP_SECRET_NAMESPACE;
 
 public class VaultWidget implements DatabaseAuthProvider.AuthWidget {
 
@@ -25,6 +26,7 @@ public class VaultWidget implements DatabaseAuthProvider.AuthWidget {
     private JBTextField addressText;
     private JBTextField secretText;
     private JBTextField tokenFileText;
+    private JBTextField secretNamespaceText;
 
     public VaultWidget() {
 
@@ -33,25 +35,31 @@ public class VaultWidget implements DatabaseAuthProvider.AuthWidget {
         addressText = new JBTextField();
         secretText = new JBTextField();
         tokenFileText = new JBTextField();
+        secretNamespaceText = new JBTextField();
 
         addressText.getEmptyText().setText("e.g.: http://example.com");
         secretText.getEmptyText().setText("e.g.: secret/my-secret");
         tokenFileText.getEmptyText().setText("Default: $HOME/.vault-token");
+        secretNamespaceText.getEmptyText().setText("e.g.: test");
 
-        panel = new JPanel(new GridLayoutManager(3, 6));
+        panel = new JPanel(new GridLayoutManager(4, 8));
 
         final var secretLabel = new JBLabel(vaultBundle.getMessage("secret"));
+        final var secretNamespaceLabel = new JBLabel(vaultBundle.getMessage("secretNamespace"));
         final var addressLabel = new JBLabel(vaultBundle.getMessage("address"));
         final var tokenFileLabel = new JBLabel(vaultBundle.getMessage("tokenFile"));
 
         panel.add(addressLabel, createLabelConstraints(0, 0, addressLabel.getPreferredSize().getWidth()));
         panel.add(addressText, createSimpleConstraints(0, 1, 3));
 
-        panel.add(secretLabel, createLabelConstraints(1, 0, secretLabel.getPreferredSize().getWidth()));
-        panel.add(secretText, createSimpleConstraints(1, 1, 3));
+        panel.add(secretNamespaceLabel, createLabelConstraints(1, 0, secretNamespaceLabel.getPreferredSize().getWidth()));
+        panel.add(secretNamespaceText, createSimpleConstraints(1, 1, 3));
 
-        panel.add(tokenFileLabel, createLabelConstraints(2, 0, tokenFileLabel.getPreferredSize().getWidth()));
-        panel.add(tokenFileText, createSimpleConstraints(2, 1, 3));
+        panel.add(secretLabel, createLabelConstraints(2, 0, secretLabel.getPreferredSize().getWidth()));
+        panel.add(secretText, createSimpleConstraints(2, 1, 3));
+
+        panel.add(tokenFileLabel, createLabelConstraints(3, 0, tokenFileLabel.getPreferredSize().getWidth()));
+        panel.add(tokenFileText, createSimpleConstraints(3, 1, 3));
     }
 
     @Override
@@ -59,6 +67,7 @@ public class VaultWidget implements DatabaseAuthProvider.AuthWidget {
         config.setAdditionalProperty(PROP_SECRET, secretText.getText());
         config.setAdditionalProperty(PROP_ADDRESS, addressText.getText());
         config.setAdditionalProperty(PROP_TOKEN_FILE, tokenFileText.getText());
+        config.setAdditionalProperty(PROP_SECRET_NAMESPACE, secretNamespaceText.getText());
     }
 
     @Override
@@ -66,6 +75,7 @@ public class VaultWidget implements DatabaseAuthProvider.AuthWidget {
         secretText.setText(point.getAdditionalProperty(PROP_SECRET));
         addressText.setText(point.getAdditionalProperty(PROP_ADDRESS));
         tokenFileText.setText(point.getAdditionalProperty(PROP_TOKEN_FILE));
+        secretNamespaceText.setText(point.getAdditionalProperty(PROP_SECRET_NAMESPACE));
     }
 
     @Override

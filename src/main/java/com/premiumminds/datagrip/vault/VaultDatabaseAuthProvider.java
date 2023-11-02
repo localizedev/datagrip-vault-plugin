@@ -41,6 +41,7 @@ public class VaultDatabaseAuthProvider implements DatabaseAuthProvider {
     private static final Logger logger = Logger.getInstance(VaultDatabaseAuthProvider.class);
 
     public static final String PROP_SECRET = "vault_secret";
+    public static final String PROP_SECRET_NAMESPACE = "vault_secret_namespace";
     public static final String PROP_ADDRESS = "vault_address";
     public static final String PROP_TOKEN_FILE = "vault_token_file";
     private static final String ENV_VAULT_AGENT_ADDR = "VAULT_AGENT_ADDR";
@@ -80,15 +81,17 @@ public class VaultDatabaseAuthProvider implements DatabaseAuthProvider {
         try {
             final var address = getAddress(protoConnection);
             final var secret = getSecret(protoConnection);
+            final var secretNamespace = protoConnection.getConnectionPoint().getAdditionalProperty(PROP_SECRET_NAMESPACE);
 
             logger.info("Address used: " + address);
             logger.info("Secret used: " + secret);
+            logger.info("Secret namespace used: " + secretNamespace);
 
             DynamicSecretKey key = new DynamicSecretKey(address, secret);
             DynamicSecretValue value = secretsCache.get(key);
 
             if (value == null || value.getExpireTime().isBefore(Instant.now())) {
-                final var response = getCredentialsFromVault(protoConnection, address, secret);
+                final var response = getCredentialsFromVault(protoConnection, address, secret, secretNamespace);
                 value = new DynamicSecretValue(Instant.now(), response);
                 secretsCache.put(key, value);
             }
@@ -113,7 +116,8 @@ public class VaultDatabaseAuthProvider implements DatabaseAuthProvider {
     private DynamicSecretResponse getCredentialsFromVault(
             ProtoConnection protoConnection,
             final String address,
-            final String secret)
+            final String secret,
+            final String secretNamespace)
             throws IOException, InterruptedException
     {
         final var token = getToken(protoConnection, address);
@@ -123,6 +127,7 @@ public class VaultDatabaseAuthProvider implements DatabaseAuthProvider {
         final var request = HttpRequest.newBuilder()
                 .GET()
                 .header("X-Vault-Token", token)
+                .header("X-Vault-Namespace", secretNamespace)
                 .uri(uri)
                 .build();
 
