@@ -55,6 +55,7 @@ public class VaultDatabaseAuthProvider implements DatabaseAuthProvider {
 
     private static final HttpClient httpClient = HttpClient.newBuilder()
             .version(HttpClient.Version.HTTP_1_1)
+            .followRedirects(HttpClient.Redirect.NORMAL)
             .connectTimeout(Duration.ofSeconds(10))
             .build();
 
